@@ -1,13 +1,16 @@
 package ro.pub.cs.systems.eim.Colocviu1_13;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class Colocviu1_13MainActivity extends AppCompatActivity {
 
@@ -19,6 +22,37 @@ public class Colocviu1_13MainActivity extends AppCompatActivity {
     private TextView text;
 
     private int counter;
+
+    private NavigateButtonOnClickListener navigateButtonOnClickListener = new NavigateButtonOnClickListener();
+    private class NavigateButtonOnClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            String textValue = text.getText().toString();
+
+            Intent intent = new Intent("ro.pub.cs.systems.eim.Colocviu1_13.Colocviu1_13SecondaryActivity");
+            intent.putExtra(Constants.TEXT_KEY, textValue);
+            startActivityForResult(intent, Constants.SECONDARY_REQUEST_CODE);
+
+            text.setText("");
+            counter = 0;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (resultCode) {
+            case RESULT_OK: {
+                Toast.makeText(this, Constants.SUCCESS_MESSAGE, Toast.LENGTH_LONG).show();
+                break;
+            }
+            case RESULT_CANCELED: {
+                Toast.makeText(this, Constants.CANCEL_MESSAGE, Toast.LENGTH_LONG).show();
+                break;
+            }
+        }
+    }
 
     private ButtonOnClickListener buttonOnClickListener = new ButtonOnClickListener();
     private class ButtonOnClickListener implements View.OnClickListener {
@@ -72,5 +106,6 @@ public class Colocviu1_13MainActivity extends AppCompatActivity {
         southButton.setOnClickListener(buttonOnClickListener);
         eastButton.setOnClickListener(buttonOnClickListener);
         westButton.setOnClickListener(buttonOnClickListener);
+        navigateButton.setOnClickListener(navigateButtonOnClickListener);
     }
 }
