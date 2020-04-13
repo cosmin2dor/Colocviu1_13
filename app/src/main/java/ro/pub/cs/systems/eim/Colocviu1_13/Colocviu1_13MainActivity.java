@@ -4,7 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +25,9 @@ public class Colocviu1_13MainActivity extends AppCompatActivity {
     private TextView text;
 
     private int counter;
+    private boolean serviceStarted = false;
+
+    private IntentFilter intentFilter = new IntentFilter();
 
     private NavigateButtonOnClickListener navigateButtonOnClickListener = new NavigateButtonOnClickListener();
     private class NavigateButtonOnClickListener implements View.OnClickListener {
@@ -66,7 +72,34 @@ public class Colocviu1_13MainActivity extends AppCompatActivity {
 
             counter++;
             Log.d("MyTag", "Button pressed: " + counter + " times");
+
+            if (counter >= 4 && !serviceStarted) {
+                Intent intent = new Intent(getApplicationContext(), Colocviu1_13Service.class);
+                intent.putExtra("instruction", newText);
+                getApplicationContext().startService(intent);
+                serviceStarted = true;
+            }
         }
+    }
+
+    private MessageBroadcastReceiver messageBroadcastReceiver = new MessageBroadcastReceiver();
+    private class MessageBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d("MyTag", intent.getStringExtra("Message"));
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(messageBroadcastReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(messageBroadcastReceiver);
+        super.onPause();
     }
 
     @Override
@@ -86,9 +119,18 @@ public class Colocviu1_13MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        Intent intent = new Intent(this, Colocviu1_13Service.class);
+        stopService(intent);
+        super.onDestroy();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_colocviu1_13_main);
+
+        intentFilter.addAction("Broadcast");
 
         // First run
         if (savedInstanceState == null) {
